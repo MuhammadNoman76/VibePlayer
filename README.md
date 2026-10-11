@@ -83,3 +83,7 @@ tools/         App icon generator
 
 Settings, resume positions and `error.log` are stored in `%APPDATA%\VibePlayer`.
 See `THIRD-PARTY-NOTICES.txt` for LibVLC (LGPL) and other licenses.
+
+## Download
+
+The latest installer is in [release/VibePlayer-Setup-1.0.0.exe](release/VibePlayer-Setup-1.0.0.exe).
