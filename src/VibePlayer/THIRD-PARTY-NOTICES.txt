@@ -1,0 +1,23 @@
+VibePlayer - third-party software notices
+=========================================
+
+VibePlayer plays media using LibVLC, the multimedia engine of VLC media player.
+
+LibVLC / VLC plugins (folder: libvlc\)
+  Copyright (C) the VideoLAN team and VLC authors - https://www.videolan.org
+  Licensed under the GNU Lesser General Public License v2.1 or later (LibVLC core);
+  some plugins are licensed under the GNU General Public License v2 or later.
+  Source code: https://code.videolan.org/videolan/vlc
+
+LibVLCSharp
+  Copyright (C) VideoLAN - https://code.videolan.org/videolan/LibVLCSharp
+  Licensed under the GNU Lesser General Public License v2.1 or later.
+
+Material Design icons
+  Copyright Google LLC - Licensed under the Apache License, Version 2.0.
+
+.NET runtime
+  Copyright (C) .NET Foundation and Contributors - Licensed under the MIT License.
+
+VibePlayer is an independent project. It is not affiliated with or endorsed by
+VideoLAN or YouTube.
