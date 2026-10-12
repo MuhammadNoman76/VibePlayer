@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using LibVLCSharp.Shared;
 
@@ -39,7 +40,16 @@ public sealed class PlayerEngine
     public DateTime LastBufferingUtc { get; private set; }
     public bool IsLoading => _loading;
 
-    private static string LibDirectory => Path.Combine(AppContext.BaseDirectory, "libvlc", "win-x64");
+    private static string LibDirectory => Path.Combine(AppContext.BaseDirectory, "libvlc", LibFolderName);
+
+    /// <summary>The VLC engine that matches this process: libvlc\win-x64, win-x86 or win-arm64.</summary>
+    private static string LibFolderName => RuntimeInformation.ProcessArchitecture switch
+    {
+        Architecture.X86 => "win-x86",
+        Architecture.Arm64 => "win-arm64",
+        _ => "win-x64",
+    };
+
     private static string PluginCacheFile => Path.Combine(LibDirectory, "plugins", "plugins.dat");
 
     private static void LoadNativeLibrary()
@@ -213,7 +223,7 @@ public sealed class PlayerEngine
     public int Volume
     {
         get => _player?.Volume ?? 100;
-        set { if (_player != null) _player.Volume = Math.Clamp(value, 0, 200); }
+        set { if (_player != null) _player.Volume = MathEx.Clamp(value, 0, 200); }
     }
 
     public bool Mute
@@ -254,7 +264,7 @@ public sealed class PlayerEngine
     }
 
     private static string Clean(string? name, string fallback) =>
-        string.IsNullOrWhiteSpace(name) ? fallback : name.Trim();
+        string.IsNullOrWhiteSpace(name) ? fallback : name!.Trim();
 
     // ---------------------------------------------------------------- video
 
@@ -271,7 +281,7 @@ public sealed class PlayerEngine
         // Leave the filter off until it's actually needed; once on, keep it on so changes don't flicker.
         if (!_adjustEnabled && Math.Abs(value - 1f) < 0.001f) return;
         _player.SetAdjustInt(VideoAdjustOption.Enable, 1);
-        _player.SetAdjustFloat(VideoAdjustOption.Brightness, Math.Clamp(value, 0f, 2f));
+        _player.SetAdjustFloat(VideoAdjustOption.Brightness, MathEx.Clamp(value, 0f, 2f));
         _adjustEnabled = true;
     }
 

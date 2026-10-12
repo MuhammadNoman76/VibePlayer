@@ -37,7 +37,7 @@ public sealed class Playlist
     public Playlist(IEnumerable<MediaItem> items, int index = 0)
     {
         Items = items.ToList();
-        Index = Items.Count == 0 ? -1 : Math.Clamp(index, 0, Items.Count - 1);
+        Index = Items.Count == 0 ? -1 : MathEx.Clamp(index, 0, Items.Count - 1);
     }
 
     public static Playlist Empty => new(Array.Empty<MediaItem>());
@@ -96,8 +96,7 @@ public sealed class Playlist
     {
         try
         {
-            var options = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
-            return Directory.EnumerateFiles(dir, "*", options)
+            return Compat.EnumerateFilesRecursive(dir)
                 .Where(MediaFormats.IsPlayable)
                 .Take(MaxFolderItems)
                 .OrderBy(f => Path.GetDirectoryName(f) ?? "", MediaFormats.NaturalComparer)

@@ -103,12 +103,12 @@ internal static class InstanceManager
     // ------------------------------------------------------------------ windows
 
     public static void ListenAsWindow(Action<string[]> onMessage) =>
-        StartServer(InstancePipe(Environment.ProcessId), onMessage, CancellationToken.None);
+        StartServer(InstancePipe(Compat.ProcessId), onMessage, CancellationToken.None);
 
     /// <summary>The most recently used VibePlayer window of another process (top of the Z-order), if any.</summary>
     public static (int Pid, string Title)? FindOpenWindow()
     {
-        var self = Environment.ProcessId;
+        var self = Compat.ProcessId;
         int session;
         using (var me = Process.GetCurrentProcess()) session = me.SessionId;
 
@@ -181,7 +181,7 @@ internal static class InstanceManager
                     server.WaitForConnectionAsync(token).GetAwaiter().GetResult();
                     using var reader = new StreamReader(server, Encoding.UTF8);
                     var text = reader.ReadToEnd();
-                    onMessage(text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+                    onMessage(Compat.SplitLines(text));
                 }
                 catch (OperationCanceledException)
                 {

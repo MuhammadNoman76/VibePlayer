@@ -89,7 +89,7 @@ public sealed class AppSettings
                 Directory.CreateDirectory(DataDirectory);
                 var tmp = FilePath + ".tmp";
                 File.WriteAllText(tmp, JsonSerializer.Serialize(this, JsonOptions));
-                File.Move(tmp, FilePath, overwrite: true);
+                Compat.MoveOverwrite(tmp, FilePath);
                 _baseline = Clone();
                 return true;
             });
@@ -165,8 +165,8 @@ public sealed class AppSettings
         Resume = new Dictionary<string, ResumeEntry>(Resume ?? new(), StringComparer.OrdinalIgnoreCase);
         Skips = new Dictionary<string, SkipEntry>(Skips ?? new(), StringComparer.OrdinalIgnoreCase);
         Recent ??= new();
-        Volume = Math.Clamp(Volume, 0, 200);
-        Brightness = Math.Clamp(Brightness, 0, 200);
+        Volume = MathEx.Clamp(Volume, 0, 200);
+        Brightness = MathEx.Clamp(Brightness, 0, 200);
     }
 
     private AppSettings Clone()

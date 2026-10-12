@@ -647,7 +647,7 @@ public partial class PlayerView : UserControl
 
         var width = TrackGrid.ActualWidth;
         if (width <= 0) return;
-        var fraction = length > 0 ? Math.Clamp((double)_shownTime / length, 0, 1) : 0;
+        var fraction = length > 0 ? MathEx.Clamp((double)_shownTime / length, 0, 1) : 0;
         PlayedFill.Width = width * fraction;
         Thumb.Margin = new Thickness(width * fraction - Thumb.Width / 2, 0, 0, 0);
 
@@ -665,8 +665,8 @@ public partial class PlayerView : UserControl
         var brush = new SolidColorBrush(Color.FromArgb(_settings.SkipEnabled ? (byte)0xE6 : (byte)0x66, 0xFF, 0xC4, 0x00));
         foreach (var range in _skips)
         {
-            var x1 = _skipMarksWidth * Math.Clamp((double)range.StartMs / _skipMarksLength, 0, 1);
-            var x2 = _skipMarksWidth * Math.Clamp((double)range.EndMs / _skipMarksLength, 0, 1);
+            var x1 = _skipMarksWidth * MathEx.Clamp((double)range.StartMs / _skipMarksLength, 0, 1);
+            var x2 = _skipMarksWidth * MathEx.Clamp((double)range.EndMs / _skipMarksLength, 0, 1);
             var mark = new System.Windows.Shapes.Rectangle { Width = Math.Max(2, x2 - x1), Height = 20, Fill = brush };
             mark.SetBinding(HeightProperty, new System.Windows.Data.Binding(nameof(ActualHeight)) { Source = TrackGrid });
             Canvas.SetLeft(mark, x1);
@@ -810,7 +810,7 @@ public partial class PlayerView : UserControl
         if (!_hasMedia || _current == null) return;
 
         var length = _lastLength;
-        ms = length > 0 ? Math.Clamp(ms, 0, Math.Max(0, length - 300)) : Math.Max(0, ms);
+        ms = length > 0 ? MathEx.Clamp(ms, 0, Math.Max(0, length - 300)) : Math.Max(0, ms);
 
         if (_ended || _engine.State is VLCState.Ended or VLCState.Stopped or VLCState.Error)
         {
@@ -844,19 +844,19 @@ public partial class PlayerView : UserControl
     private void SeekToFraction(double fraction)
     {
         if (_lastLength <= 0) return;
-        SeekTo((long)(_lastLength * Math.Clamp(fraction, 0, 1)));
+        SeekTo((long)(_lastLength * MathEx.Clamp(fraction, 0, 1)));
     }
 
     private void SetRate(float rate, bool showInfo)
     {
-        _rate = Math.Clamp(rate, 0.25f, 4f);
+        _rate = MathEx.Clamp(rate, 0.25f, 4f);
         if (!_holding) _engine.SetRate(_rate);
         if (showInfo) ShowInfo(null, Math.Abs(_rate - 1f) < 0.01f ? "Normal speed" : $"{_rate:0.##}x");
     }
 
     private void SetVolume(int volume, bool showInfo)
     {
-        volume = Math.Clamp(volume, 0, MaxVolume);
+        volume = MathEx.Clamp(volume, 0, MaxVolume);
         _settings.Volume = volume;
         _engine.Volume = volume;
         if (volume > 0 && _settings.Muted)
@@ -1501,7 +1501,7 @@ public partial class PlayerView : UserControl
     {
         var width = TrackGrid.ActualWidth;
         if (width <= 0 || _lastLength <= 0) return;
-        x = Math.Clamp(x, 0, width);
+        x = MathEx.Clamp(x, 0, width);
         HoverFill.Width = x;
 
         HoverTimeText.Text = FormatTime((long)(_lastLength * (x / width)), _lastLength);
@@ -1510,7 +1510,7 @@ public partial class PlayerView : UserControl
         var size = HoverTime.DesiredSize;
         var at = TrackGrid.TranslatePoint(new Point(x, 0), TipLayer);
         var top = ProgressArea.TranslatePoint(new Point(0, 0), TipLayer).Y;
-        Canvas.SetLeft(HoverTime, Math.Clamp(at.X - size.Width / 2, 6, Math.Max(6, TipLayer.ActualWidth - size.Width - 6)));
+        Canvas.SetLeft(HoverTime, MathEx.Clamp(at.X - size.Width / 2, 6, Math.Max(6, TipLayer.ActualWidth - size.Width - 6)));
         Canvas.SetTop(HoverTime, top - size.Height - 4);
     }
 
@@ -1518,7 +1518,7 @@ public partial class PlayerView : UserControl
     {
         var width = TrackGrid.ActualWidth;
         if (width <= 0 || _lastLength <= 0) return;
-        _dragMs = (long)(_lastLength * Math.Clamp(x / width, 0, 1));
+        _dragMs = (long)(_lastLength * MathEx.Clamp(x / width, 0, 1));
         _shownTime = _dragMs;
         RefreshTimeline();
 
@@ -1543,7 +1543,7 @@ public partial class PlayerView : UserControl
     private void SetVolumeFromSlider(double x)
     {
         var usable = VolumeSlider.Width - VolumeThumb.Width;
-        var fraction = Math.Clamp((x - VolumeThumb.Width / 2) / usable, 0, 1);
+        var fraction = MathEx.Clamp((x - VolumeThumb.Width / 2) / usable, 0, 1);
         SetVolume((int)Math.Round(fraction * 100), false);
     }
 
@@ -1671,7 +1671,7 @@ public partial class PlayerView : UserControl
         var size = TipBox.DesiredSize;
         var center = element.TranslatePoint(new Point(element.ActualWidth / 2, 0), TipLayer);
         var top = ProgressArea.TranslatePoint(new Point(0, 0), TipLayer).Y;
-        Canvas.SetLeft(TipBox, Math.Clamp(center.X - size.Width / 2, 6, Math.Max(6, TipLayer.ActualWidth - size.Width - 6)));
+        Canvas.SetLeft(TipBox, MathEx.Clamp(center.X - size.Width / 2, 6, Math.Max(6, TipLayer.ActualWidth - size.Width - 6)));
         Canvas.SetTop(TipBox, top - size.Height - 6);
     }
 
@@ -1899,7 +1899,7 @@ public partial class PlayerView : UserControl
         void Layout()
         {
             var usable = Math.Max(0, grid.ActualWidth - thumb.Width);
-            var fraction = Math.Clamp((get() - min) / (max - min), 0, 1);
+            var fraction = MathEx.Clamp((get() - min) / (max - min), 0, 1);
             thumb.Margin = new Thickness(fraction * usable, 0, 0, 0);
             fill.Width = fraction * usable + thumb.Width / 2;
         }
@@ -1907,7 +1907,7 @@ public partial class PlayerView : UserControl
         void SetFromX(double x)
         {
             var usable = Math.Max(1, grid.ActualWidth - thumb.Width);
-            set(min + Math.Clamp((x - thumb.Width / 2) / usable, 0, 1) * (max - min));
+            set(min + MathEx.Clamp((x - thumb.Width / 2) / usable, 0, 1) * (max - min));
             Layout();
         }
 
@@ -1929,7 +1929,7 @@ public partial class PlayerView : UserControl
 
     private void SetBrightness(int percent, bool showInfo)
     {
-        _settings.Brightness = Math.Clamp(percent, 0, 200);
+        _settings.Brightness = MathEx.Clamp(percent, 0, 200);
         _engine.SetBrightness(_settings.Brightness / 100f);
         if (showInfo) ShowInfo("Icon.Brightness", $"Brightness {_settings.Brightness}%");
     }

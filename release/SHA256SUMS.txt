@@ -1,0 +1,4 @@
+cf024120a0a28c3d4349882d69c80528c140c000ce8507df7a731a94ac315f6c  VibePlayer-Setup-1.0.1-arm64.exe
+a06c47831dd20c52c8047eacf351eb1e5e4ebed4f0e0cd6278121d62a5f7a26a  VibePlayer-Setup-1.0.1-win7-8.exe
+48f4a864927f84ab533c3b1ddc6dfb39cf37d44c5114099d2b62ae203ab48961  VibePlayer-Setup-1.0.1-x64.exe
+be65130e24a448c154caea61f97bca1eca3a173e5bf1773810eadb123f63b705  VibePlayer-Setup-1.0.1-x86.exe

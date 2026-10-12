@@ -61,11 +61,24 @@ internal static class Native
         public IntPtr hIconSm;
     }
 
+    // 64-bit Windows exports Get/SetWindowLongPtrW; 32-bit Windows only has Get/SetWindowLongW.
     [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
-    public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+    private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongW")]
+    private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
 
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
-    public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+    private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongW")]
+    private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    public static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex) =>
+        IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex) : new IntPtr(GetWindowLong32(hWnd, nIndex));
+
+    public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong) =>
+        IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
@@ -144,6 +157,8 @@ internal static class Native
     /// <summary>Gives the native title bar the same near-black look as the player.</summary>
     public static void ApplyDarkTitleBar(IntPtr hwnd)
     {
+        // Windows 10 (dark mode) and 11 (caption colours) only; Windows 7 / 8.1 keep their normal title bar.
+        if (Environment.OSVersion.Version.Major < 10) return;
         try
         {
             int on = 1;

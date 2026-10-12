@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    Two editions from one source:
+      net10.0-windows  Windows 10 / 11, self-contained (x64, x86 or ARM64 via -r win-...)
+      net48            Windows 7 SP1 / 8.1 (and newer), uses the .NET Framework 4.8 built into Windows
+  -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFrameworks>net10.0-windows;net48</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -11,26 +17,45 @@
     <ApplicationIcon>Assets\VibePlayer.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Product>VibePlayer</Product>
     <Company>VibePlayer</Company>
     <Description>VibePlayer - a VLC-powered media player with a YouTube-style interface</Description>
     <Copyright>Copyright © 2026</Copyright>
 
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PlatformTarget>x64</PlatformTarget>
-    <SelfContained>true</SelfContained>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
 
-    <!-- Only ship the 64-bit VLC engine -->
-    <VlcWindowsX64Enabled>true</VlcWindowsX64Enabled>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+
+    <!-- Ship only the VLC engine that matches the app's CPU -->
+    <VlcWindowsX64Enabled>false</VlcWindowsX64Enabled>
     <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
+    <VlcWindowsArm64Enabled>false</VlcWindowsArm64Enabled>
+    <VlcWindowsX64Enabled Condition="'$(RuntimeIdentifier)' == 'win-x64'">true</VlcWindowsX64Enabled>
+    <VlcWindowsX86Enabled Condition="'$(RuntimeIdentifier)' == 'win-x86'">true</VlcWindowsX86Enabled>
+    <VlcWindowsArm64Enabled Condition="'$(RuntimeIdentifier)' == 'win-arm64'">true</VlcWindowsArm64Enabled>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+    <!-- AnyCPU: runs as 64-bit on 64-bit Windows and as 32-bit on 32-bit Windows -->
+    <Prefer32Bit>false</Prefer32Bit>
+
+    <!-- Both engines; the installer only installs the one that matches the PC -->
+    <VlcWindowsX64Enabled>true</VlcWindowsX64Enabled>
+    <VlcWindowsX86Enabled>true</VlcWindowsX86Enabled>
     <VlcWindowsArm64Enabled>false</VlcWindowsArm64Enabled>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LibVLCSharp" Version="3.10.1" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.24" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Text.Json" Version="8.0.6" />
   </ItemGroup>
 
   <ItemGroup>
