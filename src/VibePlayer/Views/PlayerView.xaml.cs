@@ -162,6 +162,7 @@ public partial class PlayerView : UserControl
         RefreshRecent();
         BuildShortcuts();
         SetHasMedia(false);
+        InitUpdates();
 
         Root.SizeChanged += (_, _) =>
         {
@@ -586,6 +587,7 @@ public partial class PlayerView : UserControl
 
     private void OnTick(object? sender, EventArgs e)
     {
+        if (_updateDeferred || UpdateCard.Visibility == Visibility.Visible) UpdateCardTick();
         if (!_hasMedia) return;
         if (!_engine.IsReady)
         {
@@ -1562,7 +1564,7 @@ public partial class PlayerView : UserControl
 
     private bool CanAutoHide =>
         _hasMedia && !_ended && _engine.IsPlaying && !_settingsOpen && !_seekDragging && !_volumeDragging &&
-        !ControlsHost.IsMouseOver && ShortcutsPanel.Visibility != Visibility.Visible;
+        !ControlsHost.IsMouseOver && !UpdateCard.IsMouseOver && ShortcutsPanel.Visibility != Visibility.Visible;
 
     private void ShowControls()
     {
@@ -1753,6 +1755,8 @@ public partial class PlayerView : UserControl
             CloseSettings();
             TakeSnapshot();
         }));
+
+        SettingsItems.Children.Add(MenuRow("Icon.Download", "Updates", UpdatesMenuValue(), true, BuildUpdatesMenu));
     }
 
     private void BuildSpeedMenu() =>
@@ -1994,7 +1998,8 @@ public partial class PlayerView : UserControl
         Grid.SetColumn(right, 2);
         grid.Children.Add(right);
 
-        var row = new Border { Child = grid, Background = Brushes.Transparent, Cursor = Cursors.Hand, Padding = new Thickness(0, 0, 4, 0) };
+        var row = new ActionBorder { Child = grid, Background = Brushes.Transparent, Cursor = Cursors.Hand, Padding = new Thickness(0, 0, 4, 0), Invoked = onClick };
+        System.Windows.Automation.AutomationProperties.SetName(row, label);
         row.MouseEnter += (_, _) => row.Background = new SolidColorBrush(Color.FromArgb(0x1A, 0xFF, 0xFF, 0xFF));
         row.MouseLeave += (_, _) => row.Background = Brushes.Transparent;
         row.MouseLeftButtonUp += (_, e) =>
@@ -2128,6 +2133,7 @@ public partial class PlayerView : UserControl
         menu.Items.Add(windows);
         menu.Items.Add(new Separator());
         menu.Items.Add(MenuItem("Keyboard shortcuts & about", "?", () => ShowShortcuts(true)));
+        menu.Items.Add(MenuItem("Check for updates…", null, () => _ = CheckForUpdatesAsync(manual: true)));
         menu.Items.Add(MenuItem("Exit", "Ctrl+Q", () => _host.HostWindow.Close()));
 
         menu.Placement = PlacementMode.MousePoint;

@@ -120,6 +120,9 @@ public partial class App : Application
         InstanceManager.SetLaunchHandler(a => Dispatcher.BeginInvoke(() => window.OpenFromAnotherInstance(a)));
         window.Show();
 
+        // An update installer from an earlier session (it may still be finishing; retried for a while).
+        _ = Task.Run(Updater.CleanUpDownloadsAsync);
+
         var endBatch = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
         endBatch.Tick += (_, _) =>
         {

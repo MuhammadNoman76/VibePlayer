@@ -7,7 +7,7 @@
 
 #define AppName "VibePlayer"
 #ifndef AppVersion
-  #define AppVersion "1.0.1"
+  #define AppVersion "1.0.2"
 #endif
 #ifndef Edition
   #define Edition "x64"
@@ -90,6 +90,15 @@ Type: filesandordirs; Name: "{app}\libvlc\win-x64"; Check: not Is64BitInstallMod
 Type: filesandordirs; Name: "{app}\libvlc\win-x86"; Check: Is64BitInstallMode
 Type: filesandordirs; Name: "{app}\libvlc\win-arm64"
 #endif
+; Updating: remove the previous version's program files first, so nothing obsolete is left behind.
+; Only in VibePlayer's own folder. Settings (%APPDATA%\VibePlayer) and the uninstaller (unins000.*) are never touched.
+Type: filesandordirs; Name: "{app}\libvlc"; Check: IsOwnFolder
+Type: files; Name: "{app}\*.dll"; Check: IsOwnFolder
+Type: files; Name: "{app}\*.json"; Check: IsOwnFolder
+Type: files; Name: "{app}\*.config"; Check: IsOwnFolder
+Type: files; Name: "{app}\*.pdb"; Check: IsOwnFolder
+Type: files; Name: "{app}\createdump.exe"; Check: IsOwnFolder
+Type: files; Name: "{app}\{#AppExe}"; Check: IsOwnFolder
 
 [Files]
 #if Edition == "legacy"
@@ -138,6 +147,9 @@ Root: HKA; Subkey: "Software\Classes\Directory\shell\{#AppName}.Play\command"; V
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+; VibePlayer's updater runs setup with /VERYSILENT ... /RELAUNCH=1: start the player again afterwards
+; (as the signed-in user, not elevated, even when setup asked for administrator rights).
+Filename: "{app}\{#AppExe}"; Flags: nowait runasoriginaluser; Check: RelaunchRequested
 
 [UninstallDelete]
 ; VLC's plugin cache (shipped for x64/x86; the app may create it itself on first run)
@@ -145,8 +157,21 @@ Type: files; Name: "{app}\libvlc\win-x64\plugins\plugins.dat"
 Type: files; Name: "{app}\libvlc\win-x86\plugins\plugins.dat"
 Type: files; Name: "{app}\libvlc\win-arm64\plugins\plugins.dat"
 
-#if Edition == "legacy"
 [Code]
+// /RELAUNCH=1 on the command line (passed by VibePlayer's updater).
+function RelaunchRequested(): Boolean;
+begin
+  Result := ExpandConstant('{param:RELAUNCH|0}') = '1';
+end;
+
+// The install folder is VibePlayer's own (named VibePlayer and holding VibePlayer.exe), so old program files can go.
+function IsOwnFolder(): Boolean;
+begin
+  Result := (CompareText(ExtractFileName(RemoveBackslashUnlessRoot(ExpandConstant('{app}'))), '{#AppName}') = 0) and
+            FileExists(ExpandConstant('{app}\{#AppExe}'));
+end;
+
+#if Edition == "legacy"
 function HasDotNet48(): Boolean;
 var
   Release: Cardinal;

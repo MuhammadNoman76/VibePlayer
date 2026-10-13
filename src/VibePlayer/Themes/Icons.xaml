@@ -17,6 +17,7 @@
     <Geometry x:Key="Icon.ChevronRight">M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z</Geometry>
     <Geometry x:Key="Icon.ChevronLeft">M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z</Geometry>
     <Geometry x:Key="Icon.Check">M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z</Geometry>
+    <Geometry x:Key="Icon.Download">M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z</Geometry>
     <Geometry x:Key="Icon.FastForward">M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z</Geometry>
     <Geometry x:Key="Icon.FastRewind">M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z</Geometry>
     <Geometry x:Key="Icon.Folder">M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z</Geometry>

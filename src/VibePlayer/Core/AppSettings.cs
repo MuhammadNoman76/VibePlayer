@@ -46,6 +46,11 @@ public sealed class AppSettings
     public InstanceMode InstanceMode { get; set; } = InstanceMode.Ask;
     public bool AlwaysOnTop { get; set; }
 
+    // Updates (see Updater): check the feed now and then, remember when, and a version the user chose to skip.
+    public bool CheckForUpdates { get; set; } = true;
+    public DateTime? LastUpdateCheck { get; set; }
+    public string? SkippedVersion { get; set; }
+
     public double? WindowLeft { get; set; }
     public double? WindowTop { get; set; }
     public double? WindowWidth { get; set; }
@@ -73,6 +78,9 @@ public sealed class AppSettings
         settings._baseline = settings.Clone();
         return settings;
     }
+
+    /// <summary>When any VibePlayer window last checked for updates (read from disk, so several windows check only once).</summary>
+    public static DateTime? ReadLastUpdateCheck() => WithFileLock(ReadFile)?.LastUpdateCheck;
 
     public void Save()
     {
@@ -115,6 +123,10 @@ public sealed class AppSettings
         Brightness = Pick(Brightness, disk.Brightness, baseline.Brightness);
         InstanceMode = Pick(InstanceMode, disk.InstanceMode, baseline.InstanceMode);
         AlwaysOnTop = Pick(AlwaysOnTop, disk.AlwaysOnTop, baseline.AlwaysOnTop);
+        CheckForUpdates = Pick(CheckForUpdates, disk.CheckForUpdates, baseline.CheckForUpdates);
+        SkippedVersion = Pick(SkippedVersion, disk.SkippedVersion, baseline.SkippedVersion);
+        // Whichever window checked last.
+        if (disk.LastUpdateCheck > LastUpdateCheck || LastUpdateCheck == null) LastUpdateCheck = disk.LastUpdateCheck ?? LastUpdateCheck;
 
         // Recent: ours first, then theirs - minus anything we removed (e.g. "Clear recent").
         var removed = baseline.Recent.Except(Recent, StringComparer.OrdinalIgnoreCase).ToHashSet(StringComparer.OrdinalIgnoreCase);

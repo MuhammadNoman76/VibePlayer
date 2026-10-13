@@ -10,10 +10,10 @@ Pick the installer for your PC. Not sure? Most PCs need the first one.
 
 | Your Windows | CPU | Download | Size |
 |---|---|---|---|
-| **Windows 10 / 11**, 64-bit (most PCs) | Intel / AMD 64-bit | [VibePlayer-Setup-1.0.1-x64.exe](release/VibePlayer-Setup-1.0.1-x64.exe) | 64.0 MB |
-| **Windows 11 / 10 on ARM** (Snapdragon, Surface Pro X…) | ARM64 | [VibePlayer-Setup-1.0.1-arm64.exe](release/VibePlayer-Setup-1.0.1-arm64.exe) | 55.5 MB |
-| **Windows 10**, 32-bit | Intel / AMD 32-bit | [VibePlayer-Setup-1.0.1-x86.exe](release/VibePlayer-Setup-1.0.1-x86.exe) | 59.3 MB |
-| **Windows 7 SP1 / 8.1** (Windows 8 needs the free 8.1 update) | Intel / AMD, 32- or 64-bit | [VibePlayer-Setup-1.0.1-win7-8.exe](release/VibePlayer-Setup-1.0.1-win7-8.exe) | 43.3 MB |
+| **Windows 10 / 11**, 64-bit (most PCs) | Intel / AMD 64-bit | [VibePlayer-Setup-1.0.2-x64.exe](release/VibePlayer-Setup-1.0.2-x64.exe) | 64.0 MB |
+| **Windows 11 / 10 on ARM** (Snapdragon, Surface Pro X…) | ARM64 | [VibePlayer-Setup-1.0.2-arm64.exe](release/VibePlayer-Setup-1.0.2-arm64.exe) | 55.5 MB |
+| **Windows 10**, 32-bit | Intel / AMD 32-bit | [VibePlayer-Setup-1.0.2-x86.exe](release/VibePlayer-Setup-1.0.2-x86.exe) | 59.3 MB |
+| **Windows 7 SP1 / 8.1** (Windows 8 needs the free 8.1 update) | Intel / AMD, 32- or 64-bit | [VibePlayer-Setup-1.0.2-win7-8.exe](release/VibePlayer-Setup-1.0.2-win7-8.exe) | 43.3 MB |
 
 - The Windows 10/11 installers include everything they need. The Windows 7/8.1 edition uses Microsoft
   **.NET Framework 4.8**, which most of those PCs already have from Windows Update; setup tells you if it's
@@ -22,7 +22,7 @@ Pick the installer for your PC. Not sure? Most PCs need the first one.
 - Find your Windows version and type in *Settings › System › About* (Windows 7/8.1: *Control Panel › System*).
 - Windows XP and Vista aren't supported.
 - SHA-256 checksums are in [release/SHA256SUMS.txt](release/SHA256SUMS.txt). To check a download, run
-  `Get-FileHash .\VibePlayer-Setup-1.0.1-x64.exe` in PowerShell (Windows 7: `certutil -hashfile <file> SHA256`)
+  `Get-FileHash .\VibePlayer-Setup-1.0.2-x64.exe` in PowerShell (Windows 7: `certutil -hashfile <file> SHA256`)
   and compare the result with the list.
 - The installers aren't code-signed, so Windows SmartScreen may say *"Windows protected your PC"*.
   Click **More info › Run anyway**.
@@ -42,6 +42,32 @@ Run the installer for your PC. Setup can:
 - create a desktop shortcut
 
 Installing a newer version, or another edition, replaces the one you have; your settings are kept.
+
+## Updates
+
+From version 1.0.2 VibePlayer keeps itself up to date:
+
+- About 10 seconds after it starts, and then at most once every 24 hours while it runs, it downloads the
+  update feed [`https://www.nomanshafiq.com/updates/vibeplayer.json`](https://www.nomanshafiq.com/updates/vibeplayer.json).
+  It never slows down start-up or playback, and a failed check (offline, server down) is silent.
+- If the feed lists a newer version, a small card offers it: **Update now**, **Later** or **Skip this
+  version**. It never appears over a full-screen video that is playing (or in the miniplayer); it waits
+  until you pause or leave full screen.
+- **Update now** downloads the installer for your edition (Windows 10/11 x64, ARM64 or 32-bit, or
+  Windows 7/8.1) to `%TEMP%VibePlayer-Update`, showing the progress, and checks its size and SHA-256
+  against the feed; a file that doesn't match is deleted and never run. Then it runs the installer silently
+  and closes. The installer replaces the old version in place (removing files it no longer uses; your settings
+  in `%APPDATA%VibePlayer` stay) and starts VibePlayer again. If VibePlayer is installed for all users,
+  Windows asks for administrator permission first. The installer is removed the next time VibePlayer starts.
+- **Settings (gear) › Updates** has **Check for updates** (it also offers a version you skipped; it is in the
+  right-click menu too, which works on the start screen) and
+  **Check automatically** to turn the daily check off.
+- Privacy: the check is an ordinary HTTPS request for that JSON file, with `VibePlayer/<version>` as its
+  user agent. Nothing else is sent: no ID, no usage data, nothing about your files.
+- Versions 1.0.0 and 1.0.1 don't have the updater: install 1.0.2 over them once.
+
+For testing, the environment variable `VIBEPLAYER_UPDATE_URL` points the player at another feed (an
+`http(s)://` address or a file path); only then may installer links use plain HTTP.
 
 ## Highlights
 
@@ -107,7 +133,7 @@ programs can't run on an x64 build PC, so the ARM64 edition ships without it.
 
 ```
 src/VibePlayer/
-  Core/        PlayerEngine (LibVLC wrapper), playlist, settings, single-instance pipe, .NET Framework compatibility
+  Core/        PlayerEngine (LibVLC wrapper), playlist, settings, updater, single-instance pipe, .NET Framework compatibility
   Interop/     Win32 helpers and the native video surface VLC renders into
   Views/       MainWindow (window modes), OverlayWindow, PlayerView (YouTube-style UI), UrlDialog
   Themes/      Icons and control styles
